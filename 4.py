@@ -1,46 +1,47 @@
-import pygame, sys
+import pygame as pg
+import sys
 from pygame.locals import *
 import random, time
 
-pygame.init()
+pg.init()
 
 #Setting up FPS 
 FPS = 60
-FramePerSec = pygame.time.Clock()
+FramePerSec = pg.time.Clock()
 
-#Creating colors
+#colors
 BLUE  = (0, 0, 255)
 RED   = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-#Other Variables for use in the program
+#Variables for program
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
-SPEED = 5
+SPEED = 10
 SCORE = 0
 
 #Setting up Fonts
-font = pygame.font.SysFont("Verdana", 40)
-font_small = pygame.font.SysFont("Verdana", 10)
+font = pg.font.SysFont("Verdana", 40)
+font_small = pg.font.SysFont("Verdana", 10)
 game_over = font.render("ОЙЫН БІТТІ!", True, BLACK)
 
-background = pygame.image.load("background.png")
+bg = pg.image.load("background.png")
 
-#Create a white screen 
-screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+#screen 
+screen = pg.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 screen.fill(WHITE)
-pygame.display.set_caption("Race game for students")
+pg.display.set_caption("Race game for students")
 
 #music for atmosphere
-pygame.mixer.music.load('road.music.mp3')
-pygame.mixer.music.play(-1)
+pg.mixer.music.load('road.music.mp3')
+pg.mixer.music.play()
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(pg.sprite.Sprite):
     def __init__(self):
         super().__init__() 
-        self.image = pygame.image.load("Enemy.png")
+        self.image = pg.image.load("Enemy.png")
         self.rect = self.image.get_rect()
         self.rect.center = (random.randint(40,SCREEN_WIDTH-40), 0)
 
@@ -53,15 +54,15 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.center = (random.randint(40, SCREEN_WIDTH - 40), 0)
 
 
-class Player(pygame.sprite.Sprite):
+class Player(pg.sprite.Sprite):
     def __init__(self):
         super().__init__() 
-        self.image = pygame.transform.scale(pygame.image.load("player.png"), (100,110))
+        self.image = pg.transform.scale(pg.image.load("player.png"), (100,110))
         self.rect = self.image.get_rect()
         self.rect.center = (200, 500)
        
     def move(self):
-        klav = pygame.key.get_pressed()
+        klav = pg.key.get_pressed()
         if klav[K_UP]:
             self.rect.move_ip(0, -9)
         if klav[K_DOWN]:
@@ -70,10 +71,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.move_ip(-9,0)
         if klav[K_RIGHT]:
             self.rect.move_ip(9,0)   
-class Coins (pygame.sprite.Sprite):
+class Coins (pg.sprite.Sprite):
      def __init__ (self):
         super().__init__()
-        self.image = pygame.image.load("moneta.png")
+        self.image = pg.image.load("moneta.png")
         self.rect = self.image.get_rect()
         self.rect.center = (random.randint(20,SCREEN_WIDTH-20),random.randint(20,SCREEN_HEIGHT-20))   
 
@@ -83,35 +84,35 @@ class Coins (pygame.sprite.Sprite):
         self.rect.center = (x,y)
 
 #Setting up Sprites        
-P1 = Player()
-E1 = Enemy()
+P = Player()
+E = Enemy()
 C = Coins()
 
 #Creating Sprites Groups
-coins = pygame.sprite.Group()
+coins = pg.sprite.Group()
 coins.add(C)
-enemies = pygame.sprite.Group()
-enemies.add(E1)
-all_sprites = pygame.sprite.Group()
-all_sprites.add(P1)
-all_sprites.add(E1)
+enemies = pg.sprite.Group()
+enemies.add(E)
+all_sprites = pg.sprite.Group()
+all_sprites.add(P)
+all_sprites.add(E)
 
 #Adding a new User event 
-INC_SPEED = pygame.USEREVENT + 1
-pygame.time.set_timer(INC_SPEED, 2000)
+INC_SPEED = pg.USEREVENT + 1
+pg.time.set_timer(INC_SPEED, 2000)
 
 #Game Loop
 while True:
       
     #Cycles through all events occuring  
-    for event in pygame.event.get():
+    for event in pg.event.get():
         if event.type == INC_SPEED:
               SPEED += 0.5      
         if event.type == QUIT:
-            pygame.quit()
+            pg.quit()
             sys.exit()
 
-    screen.blit(background, (0,0))
+    screen.blit(bg, (0,0))
     scores = font_small.render(str(SCORE), True, BLACK)
     screen.blit(scores, (10,10))
 
@@ -124,30 +125,30 @@ while True:
         
 
     #To be run if collision occurs between Player and Enemy
-    if pygame.sprite.spritecollideany(P1, enemies):
-          pygame.mixer.music.stop()
-          pygame.mixer.music.load('craash.wav')
-          pygame.mixer.music.play()
+    if pg.sprite.spritecollideany(P, enemies):
+          pg.mixer.music.stop()
+          pg.mixer.music.load('craash.wav')
+          pg.mixer.music.play()
           time.sleep(1.5)           
-          screen.fill(RED)
+          screen.fill('Pink')
           screen.blit(game_over, (30,250))
           res_scores = font.render("Score: "+str(SCORE), True, BLACK)
           screen.blit(res_scores,(20,200))
-          pygame.display.update()
+          pg.display.update()
 
 
           for entity in all_sprites:
                 entity.kill() 
           time.sleep(3)
           
-          pygame.quit()
+          pg.quit()
           sys.exit()  
         
 
-    if pygame.sprite.spritecollideany(P1, coins):
-            pygame.mixer.Sound('coins.wav').play()
+    if pg.sprite.spritecollideany(P, coins):
+            pg.mixer.Sound('coins.wav').play()
             SCORE += 1
             C.move()
                       
-    pygame.display.update()
+    pg.display.update()
     FramePerSec.tick(FPS)
